@@ -1,0 +1,130 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NEON</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0b12;--panel:rgba(20,22,35,.82);--line:rgba(25,240,255,.22);--text:#f7f8ff;--muted:#8e93aa;--cyan:#19f0ff;--mag:#ff3df0;--hot:#ff4bc6;--radius:16px;--glow:0 0 18px rgba(25,240,255,.42),0 0 42px rgba(255,61,240,.26)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 18% 0%,rgba(25,240,255,.14),transparent 28%),radial-gradient(circle at 82% 18%,rgba(255,61,240,.16),transparent 31%),var(--bg);font-family:-apple-system,"PingFang SC","Segoe UI",Roboto,sans-serif;color:var(--text);display:grid;place-items:center;padding:14px}
+button,input{font:inherit}
+.app{width:min(430px,100%);min-height:min(780px,calc(100vh - 28px));display:flex;flex-direction:column;gap:13px}
+.top{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center}
+.brand{font-size:24px;font-weight:800;letter-spacing:.08em}
+.badge{font-size:12px;color:var(--muted);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);border-radius:999px;padding:8px 10px;white-space:nowrap}
+.badge b{color:var(--cyan);font-size:14px;text-shadow:0 0 10px var(--cyan)}
+.power{width:62px;height:62px;border:1px solid rgba(25,240,255,.45);border-radius:18px;background:linear-gradient(180deg,rgba(25,240,255,.15),rgba(255,61,240,.08));color:#fff;box-shadow:var(--glow);display:grid;place-items:center}
+.power.off{box-shadow:none;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#9aa}
+.card{border:1px solid rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));border-radius:var(--radius);padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.32)}
+.preview{height:132px;position:relative;overflow:hidden}
+.tube{position:absolute;left:19px;right:19px;top:54px;height:24px;border-radius:999px;background:var(--tube,#19f0ff);box-shadow:0 0 8px var(--tube,#19f0ff),0 0 30px var(--tube,#19f0ff),0 0 80px rgba(255,61,240,.45)}
+.tube:before{content:"";position:absolute;inset:4px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.8),rgba(255,255,255,.08),rgba(255,255,255,.5));mix-blend-mode:screen;opacity:.6}
+.tube:after{content:"";position:absolute;inset:-18px;border-radius:999px;background:linear-gradient(90deg,transparent,var(--cyan),var(--mag),transparent);filter:blur(16px);opacity:.46;transform:translateX(var(--move,0%))}
+.preview[data-preset="2"] .tube{background:linear-gradient(90deg,#ff3df0,#19f0ff,#ffe05c,#38ff95,#ff3df0);background-size:240% 100%;animation:flow 2.4s linear infinite}
+.preview[data-preset="3"] .tube:after{animation:slide 1.5s linear infinite;opacity:.9}
+.preview[data-preset="4"] .tube{animation:pulse .9s ease-in-out infinite}
+.preview[data-preset="5"] .tube{animation:breath 2.6s ease-in-out infinite}
+.preview[data-preset="6"] .tube{animation:music .55s ease-in-out infinite}
+.preview[data-preset="7"] .tube{background:linear-gradient(90deg,#ff3df0,#19f0ff,#ffde59,#ff563d,#19f0ff);background-size:180% 100%;animation:flow .75s linear infinite,pulse .7s ease-in-out infinite}
+.preview[data-preset="8"] .tube{background:#ffb25c;box-shadow:0 0 8px #ffb25c,0 0 22px rgba(255,178,92,.45)}
+@keyframes flow{to{background-position:240% 0}}
+@keyframes slide{from{transform:translateX(-75%)}to{transform:translateX(75%)}}
+@keyframes pulse{50%{filter:brightness(1.65);transform:scaleY(1.08)}}
+@keyframes breath{50%{filter:brightness(.58);opacity:.72}}
+@keyframes music{25%{transform:scaleY(1.35)}60%{transform:scaleY(.82)}}
+.hint{position:absolute;left:14px;bottom:12px;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.preset{min-height:60px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.055);color:var(--text);display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:center;text-align:left;padding:10px}
+.preset.active{border-color:rgba(25,240,255,.72);box-shadow:var(--glow);background:linear-gradient(135deg,rgba(25,240,255,.18),rgba(255,61,240,.12))}
+.ico{width:28px;height:28px;color:var(--cyan);filter:drop-shadow(0 0 8px rgba(25,240,255,.75))}
+.cn{font-size:15px;font-weight:750;line-height:1.15}.en{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.control{display:grid;gap:10px}.row{display:grid;grid-template-columns:78px 1fr 42px;gap:10px;align-items:center}.label{color:#d8daea;font-size:14px}.val{color:var(--muted);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+.colors{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.sw{width:34px;height:34px;border:1px solid rgba(255,255,255,.32);border-radius:12px;background:var(--c);box-shadow:0 0 16px var(--c)}
+.picker{width:42px;height:34px;border:0;background:transparent;padding:0}
+.hide{display:none}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-18px);opacity:0;background:#171927;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:10px 14px;color:#fff;font-size:13px;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{text-align:center;color:var(--muted);font-size:12px}.foot a{color:#aeb3c8;text-decoration:none}
+@media(max-width:390px){body{padding:10px}.app{gap:10px}.card{padding:12px}.preview{height:112px}.tube{top:45px}.preset{min-height:56px;padding:8px}.brand{font-size:21px}.power{width:56px;height:56px}.badge{font-size:11px;padding:7px 8px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="top">
+    <div class="brand">NEON</div>
+    <div class="badge" id="badge"><b>●</b> 演示模式</div>
+    <button class="power" id="power" aria-label="Power"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v10"/><path d="M6.8 5.8a8 8 0 1 0 10.4 0"/></svg></button>
+  </section>
+
+  <section class="card preview" id="preview" data-preset="1">
+    <div class="tube" id="tube"></div>
+    <div class="hint" id="modeText">纯色 · Static</div>
+  </section>
+
+  <section class="grid" id="presets"></section>
+
+  <section class="card control">
+    <div class="row">
+      <div class="label">亮度</div>
+      <input id="bri" type="range" min="0" max="100" value="72">
+      <div class="val" id="briVal">72%</div>
+    </div>
+    <div id="colorBox">
+      <div class="colors">
+        <button class="sw" style="--c:#19f0ff" data-color="#19f0ff" aria-label="cyan"></button>
+        <button class="sw" style="--c:#ff3df0" data-color="#ff3df0" aria-label="magenta"></button>
+        <button class="sw" style="--c:#ffffff" data-color="#ffffff" aria-label="white"></button>
+        <button class="sw" style="--c:#ff4a4a" data-color="#ff4a4a" aria-label="red"></button>
+        <button class="sw" style="--c:#38ff95" data-color="#38ff95" aria-label="green"></button>
+        <button class="sw" style="--c:#ffb25c" data-color="#ffb25c" aria-label="warm"></button>
+        <input class="picker" id="pick" type="color" value="#19f0ff" aria-label="颜色">
+      </div>
+    </div>
+    <div class="row" id="speedBox">
+      <div class="label">速度</div>
+      <input id="spd" type="range" min="0" max="100" value="55">
+      <div class="val" id="spdVal">55%</div>
+    </div>
+  </section>
+
+  <footer class="foot"><a href="/">高级设置 →</a></footer>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+var presets=[
+ [1,"纯色","Static","M5 12h14","M5 12h14"],
+ [2,"彩虹流动","Rainbow Flow","M4 13c3-4 13-4 16 0s1 3 4 0 13-4 16 0 1-3 4-4"],
+ [3,"流星","Comet","M4 16l6-8 4 4 6-6"],
+ [4,"脉冲","Pulse","M3 12h4l2-6 4 12 2-6h5"],
+ [5,"呼吸","Breathing","M12 5c4 3 6 5 6 8a6 6 0 0 1-12 0c0-3 2-5 6-8z"],
+ [6,"音乐律动","Music","M5 17V7m4 10V4m4 13V8m4 9V6"],
+ [7,"派对","Party","M5 5l14 14M19 5L5 19M12 3v18"],
+ [8,"夜间","Night","M15 4a8 8 0 1 0 5 12 7 7 0 0 1-5-12z"]
+];
+var state={on:true,preset:1,bri:72,color:"#19f0ff",speed:55};
+var $=function(id){return document.getElementById(id)};
+var adapter;
+function pct(v){return Math.round(Math.max(0,Math.min(100,+v||0))*255/100)}
+function rgb(hex){hex=hex.replace("#","");return[parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)]}
+function cmd(body){return body}
+function post(body){return fetch("/json/state",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}
+function withTimeout(p,ms){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej(Error("timeout"))},ms)})])}
+function MockAdapter(){this.live=false}
+MockAdapter.prototype={init:function(){return Promise.resolve()},isLive:function(){return false},setPower:function(on){console.log("WLED",cmd({on:on}));return Promise.resolve()},setBrightness:function(p){console.log("WLED",cmd({bri:pct(p)}));return Promise.resolve()},applyPreset:function(id){console.log("WLED",cmd({ps:id}));return Promise.resolve()},setColor:function(hex){console.log("WLED",cmd({seg:[{col:[rgb(hex)]}]}));return Promise.resolve()},setSpeed:function(p){console.log("WLED",cmd({seg:[{sx:pct(p)}]}));return Promise.resolve()}};
+function WledAdapter(){this.live=true}
+WledAdapter.prototype={init:function(){return fetch("/json/state").then(function(r){return r.json()}).then(function(s){if(typeof s.on==="boolean")state.on=s.on;if(typeof s.bri==="number")state.bri=Math.round(s.bri/255*100)})},isLive:function(){return true},setPower:function(on){return post({on:on})},setBrightness:function(p){return post({bri:pct(p)})},applyPreset:function(id){return post({ps:id})},setColor:function(hex){return post({seg:[{col:[rgb(hex)]}]})},setSpeed:function(p){return post({seg:[{sx:pct(p)}]})}};
+function toast(t){var el=$("toast");el.textContent=t;el.classList.add("show");setTimeout(function(){el.classList.remove("show")},1800)}
+function send(work){return Promise.resolve(work()).catch(function(){toast("控制失败，已切回演示模式");adapter=new MockAdapter();setBadge()})}
+function setBadge(){var live=adapter&&adapter.isLive();$("badge").innerHTML="<b>●</b> "+(live?"已连接":"演示模式")}
+function drawPresets(){var html="";presets.forEach(function(p){html+='<button class="preset" data-id="'+p[0]+'"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="'+p[3]+'"/></svg><span><span class="cn">'+p[1]+'</span><span class="en">'+p[2]+'</span></span></button>'});$("presets").innerHTML=html}
+function update(){document.body.classList.toggle("off",!state.on);$("power").classList.toggle("off",!state.on);$("preview").dataset.preset=state.preset;$("tube").style.setProperty("--tube",state.color);$("tube").style.opacity=state.on?Math.max(.18,state.bri/100):.12;$("tube").style.animationDuration=Math.max(.45,2.7-state.speed/45)+"s";var p=presets[state.preset-1];$("modeText").textContent=p[1]+" · "+p[2];$("bri").value=state.bri;$("briVal").textContent=state.bri+"%";$("spd").value=state.speed;$("spdVal").textContent=state.speed+"%";$("colorBox").classList.toggle("hide",state.preset!==1);$("speedBox").classList.toggle("hide",!(state.preset>=2&&state.preset<=7));document.querySelectorAll(".preset").forEach(function(b){b.classList.toggle("active",+b.dataset.id===state.preset)})}
+function bind(){drawPresets();$("power").onclick=function(){state.on=!state.on;update();send(function(){return adapter.setPower(state.on)})};$("presets").onclick=function(e){var b=e.target.closest(".preset");if(!b)return;state.preset=+b.dataset.id;update();send(function(){return adapter.applyPreset(state.preset)})};$("bri").oninput=function(){state.bri=+this.value;update()};$("bri").onchange=function(){send(function(){return adapter.setBrightness(state.bri)})};$("spd").oninput=function(){state.speed=+this.value;update()};$("spd").onchange=function(){send(function(){return adapter.setSpeed(state.speed)})};document.querySelectorAll("[data-color]").forEach(function(b){b.onclick=function(){state.color=b.dataset.color;$("pick").value=state.color;update();send(function(){return adapter.setColor(state.color)})}});$("pick").onchange=function(){state.color=this.value;update();send(function(){return adapter.setColor(state.color)})}}
+function boot(){bind();withTimeout(fetch("/json/info"),2000).then(function(r){if(!r.ok)throw Error("offline");adapter=new WledAdapter();return adapter.init()}).catch(function(){adapter=new MockAdapter();return adapter.init()}).then(function(){setBadge();update()})}
+boot();
+})();
+</script>
+</body>
+</html>
